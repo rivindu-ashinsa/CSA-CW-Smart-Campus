@@ -60,7 +60,7 @@ public class SensorResource {
     public Response getSensorById(@PathParam("id") String id) {
         Sensor sensor = MockDatabase.sensors.get(id);
         if (sensor == null) {
-            Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
         return Response.ok(sensor).build();
     }
