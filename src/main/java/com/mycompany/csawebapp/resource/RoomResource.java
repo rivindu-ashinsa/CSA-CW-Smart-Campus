@@ -9,6 +9,7 @@ import com.mycompany.csawebapp.model.Room;
 import java.util.Collection;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -46,6 +47,21 @@ public class RoomResource {
     public Response createRoom(Room room){
         MockDatabase.rooms.put(room.getId(), room); 
         return Response.status(Response.Status.CREATED).entity(room).build(); 
+    }
+    
+    @DELETE
+    @Path("/{id}")
+    public Response deleteRoom(@PathParam("id") String id){
+        Room room = MockDatabase.rooms.get(id); 
+        if (room == null){
+            return Response.status(Response.Status.NOT_FOUND).build(); 
+        }
+        if (!room.getSensorIds().isEmpty()){
+            return Response.status(Response.Status.CONFLICT).entity("Room contains Sensors").build(); 
+        }
+        MockDatabase.rooms.remove(id); 
+        return Response.ok("Room Deleted").build();
+                
     }
     
 }
