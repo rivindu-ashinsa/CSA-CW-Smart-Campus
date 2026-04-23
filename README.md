@@ -21,8 +21,8 @@ CSAwebApp is a REST API for managing smart-building data across Rooms, Sensors, 
 ## How to build
 1. Clone the repository:
    ```bash
-   git clone https://github.com/rivindu-ashinsa/CSAwebApp.git
-   cd CSAwebApp
+   git clone https://github.com/rivindu-ashinsa/CSA-CW-Smart-Campus.git
+   cd CSA-CW-Smart-Campus
    ```
 2. Open the project in NetBeans or IntelliJ IDEA.
 3. Ensure Java 8+ is installed.
@@ -100,14 +100,6 @@ curl -X DELETE http://localhost:8080/CSAwebApp/api/v1/rooms/R1
 ### Get Single Sensor
 ```bash
 curl http://localhost:8080/CSAwebApp/api/v1/sensors/S1
-```
-
-## Git history present
-Recent commits exist in this repository and demonstrate active version history.
-
-Example check:
-```bash
-git log --oneline -5
 ```
 
 Current data note: since `MockDatabase` is in-memory, all data resets when the server restarts.
