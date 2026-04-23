@@ -5,6 +5,7 @@
 package com.mycompany.csawebapp.resource;
 
 import com.mycompany.csawebapp.dao.MockDatabase;
+import com.mycompany.csawebapp.exception.LinkedResourceNotFoundException;
 import com.mycompany.csawebapp.model.Room;
 import com.mycompany.csawebapp.model.Sensor;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class SensorResource {
     public Response createSensor(Sensor sensor) {
         Room room = MockDatabase.rooms.get(sensor.getRoomId());
         if (room == null) {
-            return Response.status(422).entity("Referenced room does not exist").build();
+            throw new LinkedResourceNotFoundException();
         }
         MockDatabase.sensors.put(sensor.getId(), sensor);
         room.getSensorIds().add(sensor.getId());

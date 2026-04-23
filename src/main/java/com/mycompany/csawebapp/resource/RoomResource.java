@@ -5,6 +5,7 @@
 package com.mycompany.csawebapp.resource;
 
 import com.mycompany.csawebapp.dao.MockDatabase;
+import com.mycompany.csawebapp.exception.RoomNotEmptyException;
 import com.mycompany.csawebapp.model.Room;
 import java.util.Collection;
 import javax.annotation.PostConstruct;
@@ -22,46 +23,46 @@ import javax.ws.rs.core.Response;
  *
  * @author User
  */
-
 @Path("/rooms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 
 public class RoomResource {
+
     @GET
-    public Collection<Room> getAllRooms(){
-        return MockDatabase.rooms.values(); 
+    public Collection<Room> getAllRooms() {
+        return MockDatabase.rooms.values();
     }
-    
+
     @GET
     @Path("/{id}")
-    public Response getRoomById(@PathParam("id") String id){
-        Room room = MockDatabase.rooms.get(id); 
-        if (room == null){
+    public Response getRoomById(@PathParam("id") String id) {
+        Room room = MockDatabase.rooms.get(id);
+        if (room == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         return Response.ok(room).build();
     }
-    
+
     @POST
-    public Response createRoom(Room room){
-        MockDatabase.rooms.put(room.getId(), room); 
-        return Response.status(Response.Status.CREATED).entity(room).build(); 
+    public Response createRoom(Room room) {
+        MockDatabase.rooms.put(room.getId(), room);
+        return Response.status(Response.Status.CREATED).entity(room).build();
     }
-    
+
     @DELETE
     @Path("/{id}")
-    public Response deleteRoom(@PathParam("id") String id){
-        Room room = MockDatabase.rooms.get(id); 
-        if (room == null){
-            return Response.status(Response.Status.NOT_FOUND).build(); 
+    public Response deleteRoom(@PathParam("id") String id) {
+        Room room = MockDatabase.rooms.get(id);
+        if (room == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        if (!room.getSensorIds().isEmpty()){
-            return Response.status(Response.Status.CONFLICT).entity("Room contains Sensors").build(); 
+        if (!room.getSensorIds().isEmpty()) {
+            throw new RoomNotEmptyException();
         }
-        MockDatabase.rooms.remove(id); 
+        MockDatabase.rooms.remove(id);
         return Response.ok("Room Deleted").build();
-                
+
     }
-    
+
 }

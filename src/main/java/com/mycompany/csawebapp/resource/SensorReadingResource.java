@@ -1,6 +1,7 @@
 package com.mycompany.csawebapp.resource;
 
 import com.mycompany.csawebapp.dao.MockDatabase;
+import com.mycompany.csawebapp.exception.SensorUnavailableException;
 import com.mycompany.csawebapp.model.Sensor;
 import com.mycompany.csawebapp.model.SensorReading;
 
@@ -46,9 +47,8 @@ public class SensorReadingResource {
         }
 
         if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
-            return Response.status(Response.Status.FORBIDDEN)
-                    .entity("Sensor unavailable")
-                    .build();
+            throw new SensorUnavailableException();
+
         }
 
         if (reading.getId() == null || reading.getId().isEmpty()) {
