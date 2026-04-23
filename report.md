@@ -16,6 +16,7 @@ Explain the default lifecycle of a JAX-RS Resource class. Is a new instance inst
 JAX-RS, to use the terminology of JAX-RS, resource classes are request-scoped by default which means that at runtime another resource class instance will be created for every incoming HTTP request. That works for this project because the resource classes like `RoomResource` and `SensorResource` are implemented as stateless handlers, which means they do not maintain any mutable per-client state in fields inside of the class.
 
 The important architectural point is that shared app data resides in `MockDatabase` as static collections instead of stored into resource instances. Specifically, it uses a `HashMap` of `List` for readings and static `HashMap` objects to store rooms and sensors. This design allows the data to be accessed across requests, but since `HashMap` and `ArrayList` are not thread-safe when updated concurrently so concurrency control doesn't come by default. This would lead to inconsistent writes or race situations in a high-concurrency production system.The method is appropriate for coursework since it maintains a straightforward and transparent design, but using thread-safe structures or an appropriate transactional persistence layer would be the production-safe evolution.
+
 ---
 
 ## 1.2 Question
@@ -125,4 +126,8 @@ For this reason that `Logging` is a cross-cutting concern that applies to every 
 Centralized logging behavior through registration of the filter with `@Provider` which prevents to write same code at resource classes. This helps focus the controllers on business logic, minimizes redundancy, and provides a single trace of the request-response flow that is helpful in debugging, testing, and operational analysis.
 
 ---
+
+
+
+
 
