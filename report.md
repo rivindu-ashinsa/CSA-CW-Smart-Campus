@@ -13,10 +13,9 @@
 Explain the default lifecycle of a JAX-RS Resource class. Is a new instance instantiated for every incoming request, or does the runtime treat it as a singleton? Elaborate on how this architectural decision impacts the way you manage and synchronize your in-memory data structures.
 
 ## Answer
-In JAX-RS, resource classes are request-scoped by default, so the runtime generally creates a new instance of the resource class for each incoming HTTP request. In this project, that model fits well because the resource classes such as `RoomResource` and `SensorResource` are written as stateless handlers, meaning they do not keep mutable per-client state inside class fields.
+JAX-RS, to use the terminology of JAX-RS, resource classes are request-scoped by default which means that at runtime another resource class instance will be created for every incoming HTTP request. That works for this project because the resource classes like `RoomResource` and `SensorResource` are implemented as stateless handlers, which means they do not maintain any mutable per-client state in fields inside of the class.
 
-The important architectural detail is that shared application data is not stored in resource instances; it is centralized in `MockDatabase` as static collections. Specifically, the application uses static `HashMap` objects for rooms and sensors, and a `HashMap` of `List<SensorReading>` for readings. This design makes data accessible across requests, but it also means concurrency control is not guaranteed by default because `HashMap` and `ArrayList` are not thread-safe for concurrent modifications. In a high-concurrency production setup, this could lead to race conditions or inconsistent writes. For coursework, the approach is acceptable because it keeps the design simple and transparent, but the production-safe progression would be to use thread-safe structures or a proper transactional persistence layer.
-
+The important architectural point is that shared app data resides in `MockDatabase` as static collections instead of stored into resource instances. Specifically, it uses a `HashMap` of `List` for readings and static `HashMap` objects to store rooms and sensors. This design allows the data to be accessed across requests, but since `HashMap` and `ArrayList` are not thread-safe when updated concurrently so concurrency control doesn't come by default. This would lead to inconsistent writes or race situations in a high-concurrency production system.The method is appropriate for coursework since it maintains a straightforward and transparent design, but using thread-safe structures or an appropriate transactional persistence layer would be the production-safe evolution.
 ---
 
 ## 1.2 Question
@@ -25,7 +24,7 @@ Why is Hypermedia (HATEOAS) considered a hallmark of advanced RESTful design?
 ## Answer
 HATEOAS is considered an advanced REST principle because it shifts API navigation responsibility from static client assumptions to server-provided links. Instead of hardcoding endpoint paths for every interaction, a client can discover what actions are possible by following links returned in responses.
 
-This project already demonstrates a foundational version of that idea through `RootResource`, where `GET /api/v1/` returns metadata and resource links for `rooms` and `sensors`. That gives clients a discoverable entry point to the API. A more complete HATEOAS implementation would extend this pattern to entity-level responses, for example by including links to related resources such as a room's sensors or a sensor's readings. Even in its current form, the project reflects the core rationale: the API itself communicates navigation options instead of relying entirely on external documentation.
+This project has a working implementation of that idea in the form of `RootResource`, where `GET /api/v1/` returns some metadata and links to resources for rooms and sensors. That provides clients an entry point to the API that they can discover. An even fuller HATEOAS implementation would apply this closer to the entity level, for instance link to a room's sensors and a sensor's readings. The project, even in its current state, represents the fundamental reason: The API itself does not rely solely on external documentation but rather tells how to navigate.
 
 ---
 
@@ -45,7 +44,7 @@ In this API, the design is intentionally balanced. Endpoints such as `GET /rooms
 Is DELETE idempotent?
 
 ## Answer
-Yes, the DELETE behavior implemented for rooms is idempotent from a state perspective. When `DELETE /rooms/{id}` is called for an existing room that has no linked sensors, the room is removed and the response is successful. If the same request is sent again, the room no longer exists, so the endpoint returns `404 Not Found`. Although the response status differs between the first and subsequent calls, the server state does not continue changing after the first successful deletion, which is the key requirement for idempotency.
+The DELETE behaviour that we implement for rooms is state idempotent, yes. Success on `DELETE /rooms/{id}` for an existing room without linked sensors and the room is removed. If we send the same request again, since that room does not exist anymore, the endpoint `404 Not Found`. The first invocation results in a different response status but after the resource is deleted, the server state cannot further change, so this upholds the key principle for idempotency.
 
 The implementation also enforces a domain rule before deletion: if the room still has associated sensors, deletion is blocked and `RoomNotEmptyException` is mapped to `409 Conflict`. This maintains referential integrity in the in-memory model.
 
@@ -57,9 +56,9 @@ The implementation also enforces a domain rule before deletion: if the room stil
 What happens if wrong content type is sent?
 
 ## Answer
-When a request body is sent with an unsupported media type, JAX-RS/Jersey typically rejects it before the resource method executes. In this project, resource classes that process request bodies are annotated with `@Consumes(MediaType.APPLICATION_JSON)`, so JSON is the expected input format for POST operations.
+Usually, if an unsupported media type is sent with a request body then the JAX-RS/Jersey rejects it before even executing thr resource method. Here, we have resource classes that needs to consume request body annotated with `@Consumes(MediaType. APPLICATION_JSON)` the expected input type for `POST`.
 
-If a client submits a non-JSON payload, the framework response is generally `415 Unsupported Media Type`. This behavior is valuable because it protects business logic from receiving unexpected formats and enforces a consistent contract at the framework boundary. GET requests are less affected because they usually do not rely on request bodies.
+In the case of a non-JSON payload submitted by the client, for example, a `415 Unsupported Media Type` serves as the common framework response. This behavior is not useless because it shields business logic by ensuring that only expected formats are sent along and that a consistent contract exists at the framewerk boundary. This means that they are less impacted by things like `GET` requests, which do not need to rely on request bodies.
 
 ---
 
@@ -69,7 +68,7 @@ Why use @QueryParam instead of path variables for filtering?
 ## Answer
 `@QueryParam` is semantically appropriate for optional filtering of collection resources. In `SensorResource#getAllSensors`, the `type` filter is optional: when omitted, the endpoint returns all sensors, and when provided (for example, `?type=Temperature`), it narrows results to matching sensor types using case-insensitive comparison.
 
-This preserves the stable identity of the collection endpoint (`/sensors`) while allowing flexible filtering criteria to be layered on top. Path parameters are better suited for required identity segments such as `/sensors/{id}`, where the request targets one specific resource instance. Using query parameters for optional filters therefore keeps the API cleaner and more extensible.
+This preserves the stable identity of the collection endpoint (`/sensors`) while allowing flexible filtering criteria to be layered on top. Path parameters are better suited for required identity segments such as `/sensors/{id}`, where the request targets one specific resource instance. Using query parameters for optional filters, therefore keeps the API cleaner and more extensible.
 
 ---
 
@@ -91,7 +90,7 @@ Sensor readings design explanation.
 ## Answer
 Sensor readings are modeled as a nested resource under each sensor through `/sensors/{sensorId}/readings`, which correctly reflects ownership in the domain. Internally, readings are stored in `MockDatabase.readings`, where each sensor ID maps to a list of `SensorReading` records.
 
-The GET operation returns the existing list for that sensor, and when no readings are present it returns an empty list instead of an error, which gives predictable client behavior. The POST operation performs several domain checks and normalization steps: it first verifies the sensor exists (otherwise `404`), then blocks updates if the sensor is in `MAINTENANCE` state (mapped to `403`), auto-generates a reading ID when missing, auto-sets the timestamp when omitted, stores the reading in the correct sensor list, and finally updates the sensor's `currentValue` to reflect the latest measurement. This design supports both historical tracking and quick access to current sensor state.
+The GET returns the (possibly empty) list for that sensor, and when there are no readings it returns an empty list instead of an error, leading to predictable behavior in clients. Several domain checks and normalization steps occur behind the scenes when executing the `POST`: it checks if the sensor exists (otherwise `404`), blocks update if sensor in `MAINTENANCE` state (mapped to `403`), auto-generates a reading id if missing, auto-sets timestamp if omitted, stores in respective sensor list, updates `currentValue` of sensor with latest measurement. This design supports both historical tracking and quick access to current sensor state.
 
 ---
 
@@ -121,8 +120,9 @@ A safer pattern is to keep detailed technical traces in server logs while return
 Why use filters for logging?
 
 ## Answer
-Filters are ideal for logging because logging is a cross-cutting concern that applies to every endpoint, not just one resource method. In this project, `LoggingFilter` implements both `ContainerRequestFilter` and `ContainerResponseFilter`, so it logs request metadata (HTTP method and path) as well as response metadata (status code).
+For this reason that `Logging` is a cross-cutting concern that applies to every endpoint (and not just one resource method), hence `Filters` are well suited for logging behavior. In this project, we have `LoggingFilter` which implements both `ContainerRequestFilter` and `ContainerResponseFilter`, so it logs request metadata (method + path) as well as response metadata (status code).
 
-By registering the filter with `@Provider`, logging behavior is applied centrally and consistently without duplicating code across resource classes. This keeps controllers focused on business logic, reduces repetition, and provides a unified trace of request-response flow that is useful during debugging, testing, and operational analysis.
+Centralized logging behavior through registration of the filter with `@Provider` which prevents to write same code at resource classes. This helps focus the controllers on business logic, minimizes redundancy, and provides a single trace of the request-response flow that is helpful in debugging, testing, and operational analysis.
 
 ---
+
