@@ -17,20 +17,37 @@ public class SensorReading {
     public SensorReading(){
         
     }
-
     public SensorReading(String id, long timestamp, double value) {
         this.id = id;
         this.timestamp = timestamp;
         this.value = value;
     }
-    
-    public int getId() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
     }
 
     
-    public void setId(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    
+    public String getId() {
+        return id; 
+    }
+
+    
+    public void setId(String id) {
+        this.id = id; 
     }
     
 }
