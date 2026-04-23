@@ -13,7 +13,7 @@
 Explain the default lifecycle of a JAX-RS Resource class. Is a new instance instantiated for every incoming request, or does the runtime treat it as a singleton? Elaborate on how this architectural decision impacts the way you manage and synchronize your in-memory data structures.
 
 ## Answer
-JAX-RS, to use the terminology of JAX-RS, resource classes are request-scoped by default which means that at runtime another resource class instance will be created for every incoming HTTP request. That works for this project because the resource classes like `RoomResource` and `SensorResource` are implemented as stateless handlers, which means they do not maintain any mutable per-client state in fields inside of the class.
+Resource or request-scoped (for using JAX-RS terminology — default): at runtime, for each incoming HTTP request a new resource class instance will be created. Which works for this project because resource classes are stateless handlers like `RoomResource` and `SensorResource`, meaning they do not hold any mutable per-client state in fields within the class.
 
 The important architectural point is that shared app data resides in `MockDatabase` as static collections instead of stored into resource instances. Specifically, it uses a `HashMap` of `List` for readings and static `HashMap` objects to store rooms and sensors. This design allows the data to be accessed across requests, but since `HashMap` and `ArrayList` are not thread-safe when updated concurrently so concurrency control doesn't come by default. This would lead to inconsistent writes or race situations in a high-concurrency production system.The method is appropriate for coursework since it maintains a straightforward and transparent design, but using thread-safe structures or an appropriate transactional persistence layer would be the production-safe evolution.
 
@@ -35,7 +35,7 @@ This project has a working implementation of that idea in the form of `RootResou
 Implications of returning only IDs versus full objects.
 
 ## Answer
-Returning only identifiers can reduce response size and bandwidth usage, but it pushes additional complexity onto the client because extra requests are needed to resolve details. Returning full objects increases payload size, yet it usually simplifies client implementation and reduces the number of round trips required to render meaningful data.
+Only returning identifiers cuts down on response size and bandwidth usage, however it adds extra complexity for the client as they will need to make additional requests to get the details. Although returning the full objects leads to larger payloads, it generally makes client implementation easier and minimizes the number of round-trips necessary to give meaningful information.
 
 In this API, the design is intentionally balanced. Endpoints such as `GET /rooms` and `GET /sensors` return full entity objects so clients can work with useful data immediately. At the same time, room-to-sensor relationships are represented by `sensorIds` rather than embedding complete sensor objects inside each room. This avoids heavy nesting while still making relationships explicit. For coursework scope, this is a practical compromise between payload efficiency, readability, and implementation simplicity.
 

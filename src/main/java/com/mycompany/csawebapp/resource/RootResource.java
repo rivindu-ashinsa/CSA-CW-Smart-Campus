@@ -28,7 +28,7 @@ public class RootResource {
         Map<String,Object> map = new HashMap<>();
 
         map.put("version", "1.0");
-        map.put("admin", "admin@campus.com");
+        map.put("admin", "admin@smartcampus.uni.edu");
 
         Map<String,String> links = new HashMap<>();
         links.put("rooms", "/api/v1/rooms");
