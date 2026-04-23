@@ -1,68 +1,66 @@
-# CSAwebApp - Smart Building Sensor Management REST API
+# Project title
+CSAwebApp - Smart Building Sensor Management REST API
 
-## Overview
-CSAwebApp is a REST API for smart-building sensor management. It supports creating and managing rooms, assigning sensors to rooms, and storing historical sensor readings. The API follows RESTful design principles, communicates using JSON, and uses an in-memory `MockDatabase` (`HashMap`-based) for storage.
+## Overview of API design
+CSAwebApp is a REST API for managing smart-building data across Rooms, Sensors, and Sensor Readings. The design uses resource-oriented endpoints, JSON request/response payloads, and clear HTTP status handling for success and error conditions. Data is stored in an in-memory `MockDatabase` implemented with `HashMap`, which makes the project lightweight and suitable for coursework demonstrations.
 
-## API Design Overview
-
-### Technology and Architecture
-- Java Maven WAR project
-- JAX-RS (Jersey)
-- Apache Tomcat
-- REST API with JSON request/response payloads
-- In-memory persistence using `MockDatabase` with `HashMap`
-
-### Package Structure
+## Packages used
+### Internal application packages
 - `model`: Java POJOs (`Room`, `Sensor`, `SensorReading`)
-- `dao`: data access layer with `MockDatabase`
-- `resource`: REST endpoint controllers
-- `exception`: custom exception classes
-- `mapper`: exception-to-HTTP-response mappers
+- `dao`: in-memory data layer (`MockDatabase`)
+- `resource`: REST endpoint classes
+- `exception`: custom domain exceptions
+- `mapper`: exception mappers that return JSON error responses
 - `filter`: request/response logging filter
 
-### Resource Hierarchy
-- `/api/v1/rooms`
-- `/api/v1/sensors`
-- `/api/v1/sensors/{sensorId}/readings`
+### Maven dependencies
+- `org.glassfish.jersey.inject:jersey-hk2:2.32`
+- `org.glassfish.jersey.containers:jersey-container-servlet:2.32`
+- `org.glassfish.jersey.media:jersey-media-json-jackson:2.32`
 
-### HTTP Methods Used
-- `GET`
-- `POST`
-- `DELETE`
-
-### Status Codes Used
-- `200 OK`
-- `201 Created`
-- `403 Forbidden`
-- `404 Not Found`
-- `409 Conflict`
-- `422 Unprocessable Entity`
-
-## Build Instructions
+## How to build
 1. Clone the repository:
    ```bash
    git clone https://github.com/rivindu-ashinsa/CSAwebApp.git
    cd CSAwebApp
    ```
 2. Open the project in NetBeans or IntelliJ IDEA.
-3. Ensure Java 8+ is installed and configured.
-4. Ensure Maven is installed (`mvn -v`).
-5. Build the project:
+3. Ensure Java 8+ is installed.
+4. Ensure Maven is installed:
+   ```bash
+   mvn -v
+   ```
+5. Build the WAR artifact:
    ```bash
    mvn clean package
    ```
 
-## Run Server Instructions
-1. Locate the generated WAR file at `target/CSAwebApp.war`.
-2. Deploy `CSAwebApp.war` to Apache Tomcat's `webapps` directory.
+## How to run Tomcat
+1. Locate the generated file: `target/CSAwebApp.war`.
+2. Copy `CSAwebApp.war` into Apache Tomcat's `webapps` directory.
 3. Start Tomcat.
-4. Access the API at:
+4. Confirm deployment is complete, then call the API using the base URL below.
 
+## Base URL
 ```text
 http://localhost:8080/CSAwebApp/api/v1
 ```
 
-## Sample curl Commands
+## Endpoints summary
+- `GET /api/v1/` - API info
+- `GET /api/v1/rooms` - list rooms
+- `GET /api/v1/rooms/{id}` - get one room
+- `POST /api/v1/rooms` - create room
+- `DELETE /api/v1/rooms/{id}` - delete room
+- `GET /api/v1/sensors` - list sensors (supports `?type=` filter)
+- `GET /api/v1/sensors/{id}` - get one sensor
+- `POST /api/v1/sensors` - create sensor
+- `GET /api/v1/sensors/{sensorId}/readings` - list sensor readings
+- `POST /api/v1/sensors/{sensorId}/readings` - add sensor reading
+
+Common status codes used by this API: `200`, `201`, `403`, `404`, `409`, `422`.
+
+## At least 5 curl commands
 
 ### Create Room
 ```bash
@@ -104,6 +102,12 @@ curl -X DELETE http://localhost:8080/CSAwebApp/api/v1/rooms/R1
 curl http://localhost:8080/CSAwebApp/api/v1/sensors/S1
 ```
 
-## Notes
-- Data is stored in-memory using `MockDatabase`, so all data resets when the server restarts.
-- This project is designed for coursework demonstration and API design practice.
+## Git history present
+Recent commits exist in this repository and demonstrate active version history.
+
+Example check:
+```bash
+git log --oneline -5
+```
+
+Current data note: since `MockDatabase` is in-memory, all data resets when the server restarts.
