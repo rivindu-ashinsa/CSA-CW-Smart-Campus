@@ -1,6 +1,13 @@
+com\mycompany\csawebapp\mapper\LinkedResourceNotFoundMapper.class
 com\mycompany\csawebapp\resource\RootResource.class
-com\mycompany\csawebapp\resource\RoomResource.class
-com\mycompany\csawebapp\dao\MockDatabase.class
+com\mycompany\csawebapp\exception\SensorUnavailableException.class
+com\mycompany\csawebapp\mapper\RoomNotEmptyMapper.class
 com\mycompany\csawebapp\resource\SensorReadingResource.class
 com\mycompany\csawebapp\resource\SensorResource.class
+com\mycompany\csawebapp\exception\LinkedResourceNotFoundException.class
+com\mycompany\csawebapp\exception\RoomNotEmptyException.class
+com\mycompany\csawebapp\mapper\SensorUnavailableMapper.class
+com\mycompany\csawebapp\resource\RoomResource.class
+com\mycompany\csawebapp\dao\MockDatabase.class
+com\mycompany\csawebapp\filter\LoggingFilter.class
 com\mycompany\csawebapp\JakartaRestConfiguration.class
